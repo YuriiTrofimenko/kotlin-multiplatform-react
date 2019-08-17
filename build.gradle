@@ -18,7 +18,21 @@ def logback_version = '1.2.3'
 kotlin {
     jvm()
     js {
-        browser {
+        // for translation kotlin into js
+        compilations.all {
+            kotlinOptions {
+                languageVersion = "1.3"
+                moduleKind = "umd"
+                sourceMap = true
+                sourceMapEmbedSources = "always"
+                metaInfo = true
+            }
+        }
+
+        compilations.main {
+            tasks.getByName(compileKotlinTaskName).kotlinOptions {
+                main = "call"
+            }
         }
     }
     sourceSets {
@@ -59,15 +73,33 @@ kotlin {
         }
     }
 }
-
-jvmJar {
-    dependsOn(jsBrowserWebpack)
-    from(new File(jsBrowserWebpack.entry.name, jsBrowserWebpack.outputPath))
+// path to web directory relative to project build directory
+def webFolder = new File(project.buildDir, "../src/jsMain/web")
+// path to js compilations directory
+def jsCompilations = kotlin.targets.js.compilations
+// copy js compilations into web folder
+task populateWebFolder(dependsOn: [jsMainClasses]) {
+    doLast {
+        copy {
+            from jsCompilations.main.output
+            from kotlin.sourceSets.jsMain.resources.srcDirs
+            jsCompilations.test.runtimeDependencyFiles.each {
+                if (it.exists() && !it.isDirectory()) {
+                    from zipTree(it.absolutePath).matching { include '*.js' }
+                }
+            }
+            into webFolder
+        }
+    }
 }
 
-task run(type: JavaExec, dependsOn: [jvmJar]) {
-    group = "application"
-    main = "sample.SampleJvmKt"
-    classpath(configurations.jvmRuntimeClasspath, jvmJar)
+jsJar.dependsOn(populateWebFolder)
+
+task run(type: JavaExec, dependsOn: [jvmMainClasses, jsJar]) {
+    main = 'io.ktor.server.netty.EngineMain'
+    classpath { [
+            kotlin.targets.jvm.compilations.main.output.allOutputs.files,
+            configurations.jvmRuntimeClasspath,
+    ] }
     args = []
 }
