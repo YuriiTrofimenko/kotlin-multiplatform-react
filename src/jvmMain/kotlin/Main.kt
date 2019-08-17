@@ -5,8 +5,23 @@ import io.ktor.http.content.files
 import io.ktor.http.content.static
 import io.ktor.routing.get
 import io.ktor.routing.routing
+import kotlinx.css.*
+import kotlinx.css.properties.lh
 import kotlinx.html.*
 import java.io.File
+
+// apply kotlin-css
+private val globalCss = CSSBuilder().apply {
+    body {
+        margin(0.px)
+        padding(0.px)
+
+        fontSize = 13.px
+        fontFamily = "-system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen, Ubuntu, Cantarell, Droid Sans, Helvetica Neue, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen, Ubuntu, Cantarell, Droid Sans, Helvetica Neue, Arial, sans-serif"
+
+        lineHeight = 20.px.lh
+    }
+}
 
 fun Application.main() {
     val currentDir = File(".").absoluteFile
@@ -31,6 +46,9 @@ fun Application.main() {
                         +"Kotlin multiplatform react application demo"
                     }
                     style {
+                        unsafe {
+                            +globalCss.toString()
+                        }
                     }
                 }
                 body {
@@ -41,8 +59,10 @@ fun Application.main() {
                     script(src = "/static/require.min.js") {
                     }
                     script {
-                        +"require.config({baseUrl: '/static'});\n"
-                        +"require(['/static/kotlin-multiplatform-react.js']);"
+                        unsafe {
+                            +"require.config({baseUrl: '/static'});\n"
+                            +"require(['/static/kotlin-multiplatform-react.js']);"
+                        }
                     }
                 }
             }
