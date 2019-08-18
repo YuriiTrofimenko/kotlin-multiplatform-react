@@ -1,6 +1,26 @@
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import react.buildElement
+import react.dom.render
+import view.ApplicationComponent
 import kotlin.browser.document
-// hello world kotlin-js
+import kotlin.coroutines.CoroutineContext
+
+private class Application: CoroutineScope {
+    override val coroutineContext: CoroutineContext = Job()
+
+    fun start() {
+        document.getElementById("react-app")?.let {
+            render(buildElement {
+                child(ApplicationComponent::class) {
+
+                }
+            }, it)
+        }
+    }
+}
+
 fun main() {
-    val message = "Kotlin multiplatform react application demo"
-    document.getElementById("js-response")?.textContent = message
+    GlobalStyles.inject()
+    Application().start()
 }                

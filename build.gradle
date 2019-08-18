@@ -5,7 +5,8 @@ buildscript {
 }
 
 plugins {
-    id 'org.jetbrains.kotlin.multiplatform' version '1.3.41'
+    id 'kotlin-multiplatform' version '1.3.41'
+    id 'org.jetbrains.kotlin.frontend' version '0.0.45'
 }
 repositories {
     jcenter()
@@ -16,7 +17,7 @@ repositories {
 }
 
 def kotlin_version = '1.3.41'
-def ktor_version = '1.1.3'
+def ktor_version = '1.2.3'
 def logback_version = '1.2.3'
 
 kotlin {
@@ -26,7 +27,8 @@ kotlin {
         compilations.all {
             kotlinOptions {
                 languageVersion = "1.3"
-                moduleKind = "umd"
+                // for compatibility with Webpack
+                moduleKind = "commonjs"
                 sourceMap = true
                 sourceMapEmbedSources = "always"
                 metaInfo = true
@@ -73,6 +75,10 @@ kotlin {
                 implementation kotlin('stdlib-js')
                 implementation "org.jetbrains:kotlin-extensions:1.0.1-pre.82-kotlin-$kotlin_version"
                 implementation "org.jetbrains:kotlin-css:1.0.0-pre.82-kotlin-$kotlin_version"
+                implementation "org.jetbrains:kotlin-css-js:1.0.0-pre.82-kotlin-$kotlin_version"
+                implementation "org.jetbrains:kotlin-react:16.9.0-pre.82-kotlin-$kotlin_version"
+                implementation "org.jetbrains:kotlin-react-dom:16.9.0-pre.82-kotlin-$kotlin_version"
+                implementation "org.jetbrains:kotlin-styled:1.0.0-pre.82-kotlin-$kotlin_version"
             }
         }
         jsTest {
@@ -82,33 +88,33 @@ kotlin {
         }
     }
 }
-// path to web directory relative to project build directory
-def webFolder = new File(project.buildDir, "../src/jsMain/web")
-// path to js compilations directory
-def jsCompilations = kotlin.targets.js.compilations
-// copy js compilations into web folder
-task populateWebFolder(dependsOn: [jsMainClasses]) {
-    doLast {
-        copy {
-            from jsCompilations.main.output
-            from kotlin.sourceSets.jsMain.resources.srcDirs
-            jsCompilations.test.runtimeDependencyFiles.each {
-                if (it.exists() && !it.isDirectory()) {
-                    from zipTree(it.absolutePath).matching { include '*.js' }
-                }
-            }
-            into webFolder
-        }
+kotlinFrontend {
+    npm {
+        dependency("core-js", "^3.0.0")
+        dependency("kotlinx-html", "0.6.12")
+        
+        dependency("@jetbrains/kotlin-extensions", "1.0.1-pre.82")
+        dependency("@jetbrains/kotlin-css", "1.0.0-pre.82")
+        dependency("@jetbrains/kotlin-css-js", "1.0.0-pre.82")
+        
+        dependency("react", "16.9.0")
+        dependency("react-dom", "16.9.0")
+        dependency("inline-style-prefixer", "5.1.0")
+        dependency("styled-components", "4.3.2")
+    }
+    sourceMaps = false
+
+    webpackBundle {
+        port = 8080
+        bundleName = "main"
+        proxyUrl = "http://0.0.0.0:8081"
+        sourceMapEnabled = true
+        // mode = "development"
+        mode = "production"
     }
 }
 
-jsJar.dependsOn(populateWebFolder)
-
-task run(type: JavaExec, dependsOn: [jvmMainClasses, jsJar]) {
-    main = 'io.ktor.server.netty.EngineMain'
-    classpath { [
-            kotlin.targets.jvm.compilations.main.output.allOutputs.files,
-            configurations.jvmRuntimeClasspath,
-    ] }
-    args = []
+ktor {
+    port = 8081
+    mainClass = "io.ktor.server.netty.EngineMain"
 }

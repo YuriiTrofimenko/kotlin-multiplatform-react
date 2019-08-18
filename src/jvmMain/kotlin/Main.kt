@@ -8,7 +8,6 @@ import io.ktor.routing.routing
 import kotlinx.css.*
 import kotlinx.css.properties.lh
 import kotlinx.html.*
-import java.io.File
 
 // apply kotlin-css
 private val globalCss = CSSBuilder().apply {
@@ -24,16 +23,6 @@ private val globalCss = CSSBuilder().apply {
 }
 
 fun Application.main() {
-    val currentDir = File(".").absoluteFile
-    environment.log.info("Current directory: $currentDir")
-
-    val webDir = listOf(
-        "web",
-        "../src/jsMain/web",
-        "src/jsMain/web"
-    ).map {
-        File(currentDir, it)
-    }.firstOrNull { it.isDirectory }?.absoluteFile ?: error("Can't find 'web' folder for this sample")
 
     routing {
         get("/") {
@@ -53,23 +42,16 @@ fun Application.main() {
                 }
                 body {
                     div {
-                        id = "js-response"
+                        id = "react-app"
                         +"Loading..."
                     }
-                    script(src = "/static/require.min.js") {
-                    }
-                    script {
-                        unsafe {
-                            +"require.config({baseUrl: '/static'});\n"
-                            +"require(['/static/kotlin-multiplatform-react.js']);"
-                        }
-                    }
+                    script(src = "/main.bundle.js") {}
                 }
             }
         }
 
-        static("/static") {
-            files(webDir)
+        static("/") {
+            files("build/bundle")
         }
     }
 }
