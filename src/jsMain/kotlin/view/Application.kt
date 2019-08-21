@@ -12,15 +12,18 @@ import materialui.styles.palette.options.main
 import materialui.styles.palette.options.primary
 
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import kotlinx.css.marginBottom
 import kotlinx.css.padding
 import kotlinx.css.px
 import react.dom.*
-import react.RBuilder
-import react.RComponent
-import react.RProps
-import react.RState
+import model.Post
+import react.*
+import services.PostService
 import styled.StyleSheet
+import styled.css
+import styled.styledDiv
+import kotlin.random.Random
 
 private object ApplicationStyles: StyleSheet("ApplicationStyles", isStatic = true) {
     val wrapper by css {
@@ -36,7 +39,9 @@ interface ApplicationProps: RProps {
     var coroutineScope: CoroutineScope
 }
 
-class ApplicationState: RState
+class ApplicationState: RState {
+    var posts: List<Post> = emptyList()
+}
 
 class ApplicationComponent: RComponent<ApplicationProps, ApplicationState>() {
     init {
@@ -46,32 +51,34 @@ class ApplicationComponent: RComponent<ApplicationProps, ApplicationState>() {
     private val coroutineContext
         get() = props.coroutineScope.coroutineContext
 
+    override fun componentDidMount() {
+        val postService = PostService(coroutineContext)
+
+        props.coroutineScope.launch {
+            val posts = postService.getPosts()
+            setState {
+                this.posts += posts
+            }
+        }
+    }
+
     override fun RBuilder.render() {
         muiThemeProvider(theme) {
             header {
                 Header.render(this)
             }
-            div {
-                h2 {
-                    +"Welcome to React with Kotlin"
+            styledDiv {
+                css {
+                    +ApplicationStyles.wrapper
                 }
-            }
-            p {
-                +"To get started, edit "
-                code { +"app/App.kt" }
-                +" and save to reload."
-            }
-            div {
-
-            }
-            div {
-                AppbarsDemo.render(this)
-            }
-            div {
-                ButtonsDemo.render(this)
-            }
-            div {
-                InputAdornmentsDemo.render(this)
+                state.posts.map { post ->
+                    styledDiv {
+                        css {
+                            +ApplicationStyles.post
+                        }
+                        postView(post)
+                    }
+                }
             }
         }
     }

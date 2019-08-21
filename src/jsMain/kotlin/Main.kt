@@ -14,6 +14,7 @@ private class Application: CoroutineScope {
             render(buildElement {
                 child(ApplicationComponent::class) {
 
+                    attrs.coroutineScope = this@Application
                 }
             }, it)
         }
