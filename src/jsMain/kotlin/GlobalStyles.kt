@@ -1,7 +1,7 @@
-// import kotlinext.js.invoke // deprecated?
+import kotlinext.js.invoke // deprecated?
 import kotlinx.css.*
 import styled.StyledComponents
-import styled.injectGlobal
+// import styled.injectGlobal
 
 object GlobalStyles {
     fun inject() {

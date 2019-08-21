@@ -13,6 +13,9 @@ repositories {
     maven { url "https://dl.bintray.com/kotlin/ktor" }
     maven { url "https://dl.bintray.com/kotlin/kotlin-js-wrappers" }
     maven { url "https://dl.bintray.com/kotlin/kotlinx" }
+    maven {url = "https://dl.bintray.com/kotlin/kotlin-eap"}
+    maven {url = "http://dl.bintray.com/kotlin/kotlinx.html"}
+    maven { url 'https://dl.bintray.com/subroh0508/maven' }
     mavenCentral()
 }
 
@@ -45,14 +48,14 @@ kotlin {
         commonMain {
             dependencies {
                 implementation kotlin('stdlib-common')
-                implementation "org.jetbrains:kotlin-css:1.0.0-pre.82-kotlin-$kotlin_version"
+                implementation "org.jetbrains:kotlin-css:1.0.0-pre.80-kotlin-$kotlin_version"
             }
         }
         commonTest {
             dependencies {
                 implementation kotlin('test-common')
                 implementation kotlin('test-annotations-common')
-                implementation "org.jetbrains:kotlin-css:1.0.0-pre.82-kotlin-$kotlin_version"
+                implementation "org.jetbrains:kotlin-css:1.0.0-pre.80-kotlin-$kotlin_version"
             }
         }
         jvmMain {
@@ -61,7 +64,7 @@ kotlin {
                 implementation "io.ktor:ktor-server-netty:$ktor_version"
                 implementation "io.ktor:ktor-html-builder:$ktor_version"
                 implementation "ch.qos.logback:logback-classic:$logback_version"
-                implementation "org.jetbrains:kotlin-css-jvm:1.0.0-pre.82-kotlin-$kotlin_version"
+                implementation "org.jetbrains:kotlin-css-jvm:1.0.0-pre.80-kotlin-$kotlin_version"
             }
         }
         jvmTest {
@@ -73,12 +76,13 @@ kotlin {
         jsMain {
             dependencies {
                 implementation kotlin('stdlib-js')
-                implementation "org.jetbrains:kotlin-extensions:1.0.1-pre.82-kotlin-$kotlin_version"
-                implementation "org.jetbrains:kotlin-css:1.0.0-pre.82-kotlin-$kotlin_version"
-                implementation "org.jetbrains:kotlin-css-js:1.0.0-pre.82-kotlin-$kotlin_version"
-                implementation "org.jetbrains:kotlin-react:16.9.0-pre.82-kotlin-$kotlin_version"
-                implementation "org.jetbrains:kotlin-react-dom:16.9.0-pre.82-kotlin-$kotlin_version"
-                implementation "org.jetbrains:kotlin-styled:1.0.0-pre.82-kotlin-$kotlin_version"
+                implementation "org.jetbrains:kotlin-extensions:1.0.1-pre.80-kotlin-$kotlin_version"
+                implementation "org.jetbrains:kotlin-css:1.0.0-pre.80-kotlin-$kotlin_version"
+                implementation "org.jetbrains:kotlin-css-js:1.0.0-pre.80-kotlin-$kotlin_version"
+                implementation "org.jetbrains:kotlin-react:16.8.6-pre.80-kotlin-$kotlin_version"
+                implementation "org.jetbrains:kotlin-react-dom:16.8.6-pre.80-kotlin-$kotlin_version"
+                implementation "org.jetbrains:kotlin-styled:1.0.0-pre.80-kotlin-$kotlin_version"
+                implementation "subroh0508.net.kotlinmaterialui:core:0.2.0"
             }
         }
         jsTest {
@@ -90,17 +94,19 @@ kotlin {
 }
 kotlinFrontend {
     npm {
-        dependency("core-js", "^3.0.0")
+        dependency("core-js", "~3.1.4")
         dependency("kotlinx-html", "0.6.12")
         
-        dependency("@jetbrains/kotlin-extensions", "1.0.1-pre.82")
-        dependency("@jetbrains/kotlin-css", "1.0.0-pre.82")
-        dependency("@jetbrains/kotlin-css-js", "1.0.0-pre.82")
+        dependency("@jetbrains/kotlin-extensions", "1.0.1-pre.80")
+        dependency("@jetbrains/kotlin-css", "1.0.0-pre.80")
+        dependency("@jetbrains/kotlin-css-js", "1.0.0-pre.80")
         
-        dependency("react", "16.9.0")
-        dependency("react-dom", "16.9.0")
+        dependency("react", "16.8.6")
+        dependency("react-dom", "16.8.6")
         dependency("inline-style-prefixer", "5.1.0")
-        dependency("styled-components", "4.3.2")
+        dependency("styled-components", "3.4.10")
+
+        dependency("@material-ui/core", "3.9.2")
     }
     sourceMaps = false
 

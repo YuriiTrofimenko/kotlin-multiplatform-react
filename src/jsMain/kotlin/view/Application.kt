@@ -1,16 +1,26 @@
 package view
 
+import view.header.Header
+
+import kotlinx.css.Color
+
+import materialui.styles.createMuiTheme
+import materialui.styles.muitheme.MuiTheme
+import materialui.styles.muitheme.options.palette
+import materialui.styles.muithemeprovider.muiThemeProvider
+import materialui.styles.palette.options.main
+import materialui.styles.palette.options.primary
+
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.css.marginBottom
 import kotlinx.css.padding
 import kotlinx.css.px
+import react.dom.*
 import react.RBuilder
 import react.RComponent
 import react.RProps
 import react.RState
 import styled.StyleSheet
-import styled.css
-import styled.styledDiv
 
 private object ApplicationStyles: StyleSheet("ApplicationStyles", isStatic = true) {
     val wrapper by css {
@@ -37,12 +47,41 @@ class ApplicationComponent: RComponent<ApplicationProps, ApplicationState>() {
         get() = props.coroutineScope.coroutineContext
 
     override fun RBuilder.render() {
-        styledDiv {
-            css {
-                +ApplicationStyles.wrapper
+        muiThemeProvider(theme) {
+            header {
+                Header.render(this)
             }
+            div {
+                h2 {
+                    +"Welcome to React with Kotlin"
+                }
+            }
+            p {
+                +"To get started, edit "
+                code { +"app/App.kt" }
+                +" and save to reload."
+            }
+            div {
 
-            +"Kotlin multiplatform react application demo"
+            }
+            div {
+                AppbarsDemo.render(this)
+            }
+            div {
+                ButtonsDemo.render(this)
+            }
+            div {
+                InputAdornmentsDemo.render(this)
+            }
+        }
+    }
+    companion object {
+        private val theme: MuiTheme = createMuiTheme {
+            palette {
+                primary {
+                    main = Color("#2196f3")
+                }
+            }
         }
     }
 }
