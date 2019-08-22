@@ -59,6 +59,12 @@ class PostView: RComponent<PostProps, PostState>() {
                 }
             }
             cardContent {
+                props.user?.let {
+                    userView(it) {
+
+                    }
+                    // UserView.render(it, this)
+                }
                 styledDiv {
                     css {
                         +PostStyles.noComments
