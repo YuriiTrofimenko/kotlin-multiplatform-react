@@ -18,12 +18,14 @@ import kotlinx.html.*
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.list
 import model.Post
+import model.PostWithComments
 import network.PostClient
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.batchInsert
 import org.jetbrains.exposed.sql.selectAll
 import rpc.rpc
 import services.PostService
+import services.PostWithCommentsService
 
 // apply kotlin-css
 private val globalCss = CSSBuilder().apply {
@@ -95,6 +97,7 @@ fun Application.main() {
 
         route("/api") {
             rpc(PostService::class, Post.serializer())
+            rpc(PostWithCommentsService::class, PostWithComments.serializer())
         }
     }
 }

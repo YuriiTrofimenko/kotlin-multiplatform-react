@@ -2,16 +2,18 @@ package view
 
 import materialui.components.card.card
 
+
 import kotlinx.css.*
 import kotlinx.css.properties.borderBottom
 import materialui.components.cardcontent.cardContent
 import materialui.components.cardheader.cardHeader
-import model.Post
+import model.PostWithComments
 import model.User
 import react.*
 import styled.StyleSheet
 import styled.css
 import styled.styledDiv
+import view.button.spinnerButtonView
 
 object PostStyles : StyleSheet("PostStyles", isStatic = true) {
     val noComments by css {
@@ -35,19 +37,58 @@ object PostStyles : StyleSheet("PostStyles", isStatic = true) {
 }
 
 interface PostProps: RProps {
-    var post: Post
+    var postWithComments: PostWithComments
     var user: User?
+    var onMoreComments: () -> Unit
 }
 
-class PostState: RState
+class PostState: RState {
+    var noMore: Boolean = false
+    var loading: Boolean = false
+}
 
 class PostView: RComponent<PostProps, PostState>() {
     private val post
-        get() = props.post
+        get() = props.postWithComments.post
+
+    private val comments
+        get() = props.postWithComments.comments
 
     init {
         state = PostState()
     }
+
+    override fun componentDidUpdate(prevProps: PostProps, prevState: PostState, snapshot: Any) {
+        println("componentDidUpdate")
+        println("props.postWithComments.hasMore " + props.postWithComments.hasMore)
+        /* if (state.loading && prevProps != props) {
+            setState {
+                noMore = prevProps.postWithComments.comments.size == props.postWithComments.comments.size
+                println("prev = " + prevProps.postWithComments.comments.size)
+                println("now = " + props.postWithComments.comments.size)
+                loading = false
+            }
+        } */
+        if (prevProps != props) {
+            setState {
+                noMore = !props.postWithComments.hasMore
+            }
+        }
+    }
+
+    /* override fun componentWillUpdate(nextProps: PostProps, nextState: PostState) {
+        println("componentDidUpdate")
+        println("state.loading " + state.loading)
+        println("nextProps != props " + (nextProps != props))
+        if (state.loading && nextProps != props) {
+            setState {
+                noMore = nextProps.postWithComments.comments.size == props.postWithComments.comments.size
+                println("prev = " + nextProps.postWithComments.comments.size)
+                println("now = " + props.postWithComments.comments.size)
+                loading = false
+            }
+        }
+    } */
 
     override fun RBuilder.render() {
         card {
@@ -67,19 +108,36 @@ class PostView: RComponent<PostProps, PostState>() {
                 }
                 styledDiv {
                     css {
-                        +PostStyles.noComments
+                        if (comments.isNotEmpty()) {
+                            +PostStyles.body
+                        }
+                        else {
+                            +PostStyles.noComments
+                        }
                     }
                     +post.body
+                }
+                comments.forEach {
+                    commentView(it) {
+                        css {
+                            +PostStyles.comment
+                        }
+                    }
+                }
+
+                if (!state.noMore) {
+                    spinnerButtonView(fetchData = { props.onMoreComments() })
                 }
             }
         }
     }
 }
 
-fun RBuilder.postView(post: Post, user: User? = null, handler: RHandler<PostProps> = {}) {
+fun RBuilder.postView(post: PostWithComments, user: User? = null, onMoreComments: () -> Unit, handler: RHandler<PostProps> = {}) {
     child(PostView::class) {
-        attrs.post = post
+        attrs.postWithComments = post
         attrs.user = user
+        attrs.onMoreComments = onMoreComments
         handler()
     }
 }

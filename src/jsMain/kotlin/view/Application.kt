@@ -13,12 +13,14 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
 import kotlinx.css.*
 import react.dom.*
-import model.Post
+import model.PostWithComments
 import model.User
 import react.*
-import services.PostService
+import services.CommentsService
+import services.PostWithCommentsService
 import services.UserService
 import styled.*
+import kotlin.random.Random
 
 private object ApplicationStyles: StyleSheet("ApplicationStyles", isStatic = true) {
     val wrapper by css {
@@ -35,7 +37,7 @@ interface ApplicationProps: RProps {
 }
 
 class ApplicationState: RState {
-    var posts: List<Post> = emptyList()
+    var postWithComments: List<PostWithComments> = emptyList()
     var users: Map<Int, User> = emptyMap()
 }
 
@@ -48,23 +50,24 @@ class ApplicationComponent: RComponent<ApplicationProps, ApplicationState>() {
         get() = props.coroutineScope.coroutineContext
 
     override fun componentDidMount() {
-        val postService = PostService(coroutineContext)
+        val postWithCommentsService = PostWithCommentsService(coroutineContext)
         val userService = UserService(coroutineContext)
 
         props.coroutineScope.launch {
-            val posts = postService.getPosts()
+            val posts = postWithCommentsService.getPostsWithComments()
             setState {
-                this.posts += posts
+                postWithComments += posts
             }
             // Parallel coroutines execution
-            val userIds = posts.map { it.userId }.toSet()
+            val userIds = posts.map { it.post.userId }.toSet()
             val users = userIds
                 .map { async { userService.getUser(it) } }
                 .awaitAll()
                 .toSet()
+                .associateBy { it.id }
 
             setState {
-                this.users = users.associateBy { it.id }
+                this.users = users
             }
         }
     }
@@ -91,12 +94,33 @@ class ApplicationComponent: RComponent<ApplicationProps, ApplicationState>() {
                 css {
                     +ApplicationStyles.wrapper
                 }
-                state.posts.map { post ->
+                state.postWithComments.map { postWithComments ->
                     styledDiv {
                         css {
                             +ApplicationStyles.post
                         }
-                        postView(post, state.users[post.userId])
+                        postView(postWithComments, state.users[postWithComments.post.userId], onMoreComments = {
+                            onMoreComment(postWithComments.post.id)
+                        })
+                    }
+                }
+            }
+        }
+    }
+
+    private fun onMoreComment(postId: Int) {
+        val commentsService = CommentsService(coroutineContext)
+        val post = state.postWithComments.find { it.post.id == postId }
+
+        if (post != null) {
+            props.coroutineScope.launch {
+                val randomMoreNumber = Random.nextInt(3)
+                val comments = commentsService.getComments(postId.toString(), post.comments.size, randomMoreNumber)
+                println(post.comments.size)
+                println(randomMoreNumber)
+                setState {
+                    postWithComments = postWithComments.map {
+                        if (it != post) it else PostWithComments(it.post, it.comments + comments, randomMoreNumber != 0)
                     }
                 }
             }

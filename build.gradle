@@ -104,6 +104,7 @@ kotlinFrontend {
         dependency("core-js", "~3.1.4")
         dependency("kotlinx-html", "0.6.12")
         dependency("svg-inline-loader", "0.8.0")
+        dependency("@fortawesome/fontawesome-free", "5.10.2")
         
         dependency("@jetbrains/kotlin-extensions", "1.0.1-pre.80")
         dependency("@jetbrains/kotlin-css", "1.0.0-pre.80")
