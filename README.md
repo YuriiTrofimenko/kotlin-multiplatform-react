@@ -21,5 +21,7 @@ JDK: 1.8.0_201
 
 `gradle jvmTest` to run common and jvm tests with JUnit.
 
+`gradle runKarmaTests` to run common and js tests with Mocha and Karma.
+
 ### Hosts
 Webpack dev server responding at http://0.0.0.0:8080. Ktor application responding at http://0.0.0.0:8081

@@ -72,23 +72,10 @@ class PostView: RComponent<PostProps, PostState>() {
         if (prevProps != props) {
             setState {
                 noMore = !props.postWithComments.hasMore
-            }
-        }
-    }
-
-    /* override fun componentWillUpdate(nextProps: PostProps, nextState: PostState) {
-        println("componentDidUpdate")
-        println("state.loading " + state.loading)
-        println("nextProps != props " + (nextProps != props))
-        if (state.loading && nextProps != props) {
-            setState {
-                noMore = nextProps.postWithComments.comments.size == props.postWithComments.comments.size
-                println("prev = " + nextProps.postWithComments.comments.size)
-                println("now = " + props.postWithComments.comments.size)
                 loading = false
             }
         }
-    } */
+    }
 
     override fun RBuilder.render() {
         card {
@@ -126,7 +113,12 @@ class PostView: RComponent<PostProps, PostState>() {
                 }
 
                 if (!state.noMore) {
-                    spinnerButtonView(fetchData = { props.onMoreComments() })
+                    spinnerButtonView(fetchData = {
+                        setState {
+                            loading = true
+                        }
+                        props.onMoreComments()
+                    })
                 }
             }
         }
