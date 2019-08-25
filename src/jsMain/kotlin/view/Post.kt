@@ -10,6 +10,7 @@ import materialui.components.cardheader.cardHeader
 import model.PostWithComments
 import model.User
 import react.*
+import react.router.dom.navLink
 import styled.StyleSheet
 import styled.css
 import styled.styledDiv
@@ -40,6 +41,7 @@ interface PostProps: RProps {
     var postWithComments: PostWithComments
     var user: User?
     var onMoreComments: () -> Unit
+    var hideMoreCommentsButton: Boolean
 }
 
 class PostState: RState {
@@ -82,7 +84,9 @@ class PostView: RComponent<PostProps, PostState>() {
             cardHeader {
                 attrs {
                     title {
-                        +post.title
+                        navLink(to="/post/${post.id}"){
+                            +post.title
+                        }
                     }
                 }
             }
@@ -112,7 +116,7 @@ class PostView: RComponent<PostProps, PostState>() {
                     }
                 }
 
-                if (!state.noMore) {
+                if (!state.noMore && !props.hideMoreCommentsButton) {
                     spinnerButtonView(fetchData = {
                         setState {
                             loading = true
@@ -125,11 +129,12 @@ class PostView: RComponent<PostProps, PostState>() {
     }
 }
 
-fun RBuilder.postView(post: PostWithComments, user: User? = null, onMoreComments: () -> Unit, handler: RHandler<PostProps> = {}) {
+fun RBuilder.postView(post: PostWithComments, user: User? = null, onMoreComments: () -> Unit = {}, hideMoreCommentsButton: Boolean = false, handler: RHandler<PostProps> = {}) {
     child(PostView::class) {
         attrs.postWithComments = post
         attrs.user = user
         attrs.onMoreComments = onMoreComments
+        attrs.hideMoreCommentsButton = hideMoreCommentsButton
         handler()
     }
 }

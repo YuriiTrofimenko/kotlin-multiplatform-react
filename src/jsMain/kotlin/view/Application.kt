@@ -1,136 +1,36 @@
 package view
 
-import materialui.styles.createMuiTheme
-import materialui.styles.muitheme.MuiTheme
-import materialui.styles.muitheme.options.palette
-import materialui.styles.muithemeprovider.muiThemeProvider
-import materialui.styles.palette.options.main
-import materialui.styles.palette.options.primary
-
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.launch
-import kotlinx.css.*
-import react.dom.*
-import model.PostWithComments
-import model.User
 import react.*
-import services.CommentsService
-import services.PostWithCommentsService
-import services.UserService
-import styled.*
-import kotlin.random.Random
-
-private object ApplicationStyles: StyleSheet("ApplicationStyles", isStatic = true) {
-    val wrapper by css {
-        padding(32.px, 16.px)
-    }
-
-    val post by css {
-        marginBottom = 32.px
-    }
-}
+import react.dom.div
+import react.dom.nav
+import react.router.dom.*
+import view.pages.PostListComponent
+import view.pages.postDetailsView
+import view.pages.postListView
 
 interface ApplicationProps: RProps {
+    var id: Int
     var coroutineScope: CoroutineScope
 }
 
-class ApplicationState: RState {
-    var postWithComments: List<PostWithComments> = emptyList()
-    var users: Map<Int, User> = emptyMap()
-}
-
-class ApplicationComponent: RComponent<ApplicationProps, ApplicationState>() {
-    init {
-        state = ApplicationState()
-    }
-
-    private val coroutineContext
-        get() = props.coroutineScope.coroutineContext
-
-    override fun componentDidMount() {
-        val postWithCommentsService = PostWithCommentsService(coroutineContext)
-        val userService = UserService(coroutineContext)
-
-        props.coroutineScope.launch {
-            val posts = postWithCommentsService.getPostsWithComments()
-            setState {
-                postWithComments += posts
-            }
-            // Parallel coroutines execution
-            val userIds = posts.map { it.post.userId }.toSet()
-            val users = userIds
-                .map { async { userService.getUser(it) } }
-                .awaitAll()
-                .toSet()
-                .associateBy { it.id }
-
-            setState {
-                this.users = users
-            }
-        }
-    }
-
+class ApplicationComponent : RComponent<ApplicationProps, RState>() {
     override fun RBuilder.render() {
-        muiThemeProvider(theme) {
-            header {
-                styledH1 {
-                    css {
-                        marginLeft = 48.px
-                    }
-                    a("/") {
-                        styledImg(src = "http://resources.jetbrains.com/storage/products/intellij-idea/img/meta/intellij-idea_logo_300x300.png"){
-                            css {
-                                height = 64.px
-                                width = 64.px
-                            }
-                        }
-                    }
-                    +" Hello KotlinMP Web!"
-                }
-            }
-            styledDiv {
-                css {
-                    +ApplicationStyles.wrapper
-                }
-                state.postWithComments.map { postWithComments ->
-                    styledDiv {
-                        css {
-                            +ApplicationStyles.post
-                        }
-                        postView(postWithComments, state.users[postWithComments.post.userId], onMoreComments = {
-                            onMoreComment(postWithComments.post.id)
-                        })
+        browserRouter {
+            /* nav {
+                navLink(to="/"){}
+                navLink(to="/post/"){}
+            } */
+            switch {
+                route<ApplicationProps>("/", exact = true) {
+                    div {
+                        postListView(coroutineScope = props.coroutineScope)
                     }
                 }
-            }
-        }
-    }
-
-    private fun onMoreComment(postId: Int) {
-        val commentsService = CommentsService(coroutineContext)
-        val post = state.postWithComments.find { it.post.id == postId }
-
-        if (post != null) {
-            props.coroutineScope.launch {
-                val randomMoreNumber = Random.nextInt(3)
-                val comments = commentsService.getComments(postId.toString(), post.comments.size, randomMoreNumber)
-                println(post.comments.size)
-                println(randomMoreNumber)
-                setState {
-                    postWithComments = postWithComments.map {
-                        if (it != post) it else PostWithComments(it.post, it.comments + comments, randomMoreNumber != 0)
+                route<ApplicationProps>("/post/:id") {urlProps ->
+                    div {
+                        postDetailsView(coroutineScope = props.coroutineScope, id = urlProps.match.params.id)
                     }
-                }
-            }
-        }
-    }
-    companion object {
-        private val theme: MuiTheme = createMuiTheme {
-            palette {
-                primary {
-                    main = Color("#2196f3")
                 }
             }
         }
