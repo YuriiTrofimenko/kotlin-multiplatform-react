@@ -3,6 +3,7 @@ import model.Post
 import model.PostWithComments
 import view.PostState
 import view.PostView
+import react.router.dom.browserRouter
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
@@ -29,10 +30,18 @@ class SampleEnzymeTest: EnzymeTest() {
         )
 
         val element = enzymeMount {
-            child(PostView::class) {
+            /*child(PostView::class) {
                 attrs.postWithComments = testPostData
                 attrs.onMoreComments = {
                     callCount++
+                }
+            }*/
+            browserRouter{
+                child(PostView::class) {
+                    attrs.postWithComments = testPostData
+                    attrs.onMoreComments = {
+                        callCount++
+                    }
                 }
             }
         }
