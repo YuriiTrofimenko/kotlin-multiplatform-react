@@ -28,21 +28,21 @@ This application has no error handling and has very limited RPC serialization. I
 ### Useful Gradle tasks
 `gradle run` runs webpack dev server and ktor application. You could find logs at `build/logs`.
 
-`gradle stop` stops webpack dev server and ktor application.
+`Ctrl + C` stops webpack dev server and ktor application.
 
 `gradle bundle` to create static files bundle.
 
-`gradle webpack-run` runs webpack dev server only.
+`gradle run -t` runs continuous build (watch mode).
 
-`gradle webpack-stop` stops webpack dev server only.
+`gradle build` to create static files bundle.
 
-`gradle ktor-run` runs ktor application only.
+`gradle :client:run` runs webpack-dev-server only.
 
-`gradle ktor-stop` stops ktor application only.
+`gradle :server:run` runs the Ktor application only.
 
-`gradle jvmTest` to run common and jvm tests with JUnit.
+`gradle :server:test` to run common and JVM tests with JUnit.
 
-`gradle runKarmaTests` to run common and js tests with Mocha and Karma.
+`gradle :client:test` to run common and JS tests with Mocha and Karma.
 
 ### Hosts
 Webpack dev server responding at http://0.0.0.0:8080. Ktor application responding at http://0.0.0.0:8081
