@@ -1,4 +1,3 @@
-include ':androidclient'
 // plugins management
 pluginManagement {
     resolutionStrategy {
@@ -19,4 +18,5 @@ rootProject.name = 'kotlin-multiplatform-react'
 include 'shared'
 include 'client'
 include 'server'
+include 'androidclient'
 
