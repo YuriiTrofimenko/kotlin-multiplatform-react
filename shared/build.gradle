@@ -3,6 +3,8 @@ plugins {
     id 'kotlinx-serialization'
 }
 
+// apply plugin: 'kotlin-platform-common'
+
 repositories {
     jcenter()
     maven { url "https://dl.bintray.com/kotlin/ktor" }
